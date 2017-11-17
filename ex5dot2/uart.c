@@ -1,4 +1,3 @@
-//You will need the following “include” directives in your uart.c file:
 #include <stm32f10x.h>
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_gpio.h>
@@ -26,8 +25,7 @@ int uart_open(USART_TypeDef* USARTx , uint32_t baud , uint32_t flags)
 	USART_InitTypeDef USART_InitStructure;
 		// Initialize USART structure
 	USART_StructInit(&USART_InitStructure);
-		// Modify USART_InitStructure for non-default values , e.g.
-		// USART_InitStructure.USART_BaudRate = 38400;
+		// Modify USART_InitStructure for non-default values
 	USART_InitStructure.USART_BaudRate = 9600;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_Init(USART1 ,&USART_InitStructure);

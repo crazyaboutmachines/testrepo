@@ -5,4 +5,5 @@ main.o: main.c \
  ../../template/STM32-Template/stm32f10x_conf.h \
  /home/gl/Desktop/STM32/book/STlibs/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h \
  /home/gl/Desktop/STM32/book/STlibs/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_gpio.h \
- spi.h
+ spi.h \
+ /home/gl/Desktop/STM32/book/STlibs/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_spi.h

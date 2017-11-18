@@ -16,13 +16,12 @@ void spiInit(SPI_TypeDef *SPIx)
 	GPIO_StructInit(&GPIO_InitStructure);
 	SPI_StructInit(&SPI_InitStructure);
 	if (SPIx == SPI2) {
-	// Enable clocks , configure pins----------------------------------------
 		//Enable Peripheral Clocks
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB| RCC_APB2Periph_AFIO, ENABLE); // (1)
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB| RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
 		//Configure Pins
 		GPIO_InitTypeDef GPIO_InitStructure;
-		GPIO_StructInit(&GPIO_InitStructure); // 2
+		GPIO_StructInit(&GPIO_InitStructure);
 		// Initialize SCK
 		GPIO_InitStructure.GPIO_Pin=GPIO_Pin_13;
 		GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF_PP;
@@ -37,9 +36,8 @@ void spiInit(SPI_TypeDef *SPIx)
 		GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF_PP;
 		GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
 		GPIO_Init(GPIOB, &GPIO_InitStructure);
-	//------------------------------------------------------------------------
 	} else {
-	return;
+		return;
 	}
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
 	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
@@ -54,8 +52,32 @@ void spiInit(SPI_TypeDef *SPIx)
 }
 
 
-int spiReadWrite(SPI_TypeDef* SPIx , uint8_t *rbuf , const uint8_t *tbuf , int cnt, enum spiSpeed speed) //<----ver melhor como funciona
-	{
+int spiReadWrite(SPI_TypeDef* SPIx , uint8_t *rbuf , const uint8_t *tbuf , int cnt, enum spiSpeed speed)
+{
+	SPI_DataSizeConfig(SPIx , SPI_DataSize_8b);
+
+	int i;
+	SPIx ->CR1 = (SPIx ->CR1 & ~SPI_BaudRatePrescaler_256) | speeds[speed];
+	for (i = 0; i < cnt; i++){
+		if (tbuf) {
+		SPI_I2S_SendData(SPIx , *tbuf++);
+		} else {
+		SPI_I2S_SendData(SPIx , 0xff);
+		}
+	while (SPI_I2S_GetFlagStatus(SPIx , SPI_I2S_FLAG_RXNE) == RESET);
+	if (rbuf) {
+		*rbuf++ = SPI_I2S_ReceiveData(SPIx);
+	} else {
+		SPI_I2S_ReceiveData(SPIx);
+	}
+	}
+	return i;
+}
+
+int spiReadWrite16(SPI_TypeDef* SPIx , uint16_t *rbuf ,const uint16_t *tbuf , int cnt, enum spiSpeed speed)
+{
+	SPI_DataSizeConfig(SPIx , SPI_DataSize_16b);
+
 	int i;
 	SPIx ->CR1 = (SPIx ->CR1 & ~SPI_BaudRatePrescaler_256) | speeds[speed];
 	for (i = 0; i < cnt; i++){

@@ -36,6 +36,22 @@ int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset);
 int eepromRead(uint8_t *buf, uint8_t cnt, uint16_t offset);
 ////-----------------------depois passar todo codigo relativo a eeprom para uma função externa
 
+
+
+//Timer code
+static __IO uint32_t TimingDelay;
+
+
+void Delay(uint32_t nTime);
+void SysTick_Handler(void);
+
+
+
+
+
+
+
+
 void main()
 {
 	int i, j;
@@ -58,31 +74,6 @@ void main()
 
 	spiInit(SPI2);
 
-//Loop-back for SPI in 8 bit mode
-/*	for (i = 0; i < 8; i++) {
-		for (j = 0; j < 4; j++)
-			txbuf[j] = i*4 + j;
-		GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
-		spiReadWrite(SPI2 , rxbuf , txbuf , 4, SPI_SLOW);
-		GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
-		for (j = 0; j < 4; j++)
-			if (rxbuf[j] != txbuf[j])
-				assert_failed(__FILE__ , __LINE__);
-	}
-*/
-//Loop-back for SPI in 16 bit mode
-/*	for (i = 0; i < 8; i++) {
-		for (j = 0; j < 4; j++)
-			txbuf16[j] = i*4 + j + (i << 8);
-		GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
-		spiReadWrite16(SPI2 , rxbuf16 , txbuf16 , 4, SPI_SLOW);
-		GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
-		for (j = 0; j < 4; j++)
-			if (rxbuf16[j] != txbuf16[j])
-				assert_failed(__FILE__ , __LINE__);
-	}
-*/
-
 
 //New------------------------------------------------------------------------
 /*
@@ -92,7 +83,11 @@ A ideia é escrever uma coisa na EEPROM, leer essa coisa da EEPROM e confirmar s
 */
 
 
-
+/*
+uint8_t estatus=0x00; 
+estatus=eepromReadStatus();
+GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit_SET); //End of execution indicator
+*/
 
 
 
@@ -103,6 +98,10 @@ uint16_t offset= 0x0002;
 uint8_t ola = 0x00;
 
 eepromWrite(buf, cnt, offset);
+
+
+//Delay(250);
+//por aqui um delay???
 ola=eepromRead(buf, cnt, offset);
 
 if(ola==0x0A){
@@ -111,10 +110,6 @@ if(ola==0x0A){
 
 	GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit_RESET); //End of execution indicator
 }
-
-ola=ola+1;
-
-
 
 }
 
@@ -160,7 +155,7 @@ void eepromWriteStatus(uint8_t status){
 }
 
 int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset){ //for now writes only one byte
-	uint8_t cmd[] = {cmdWRITE , 0x00, 0x02, 0x0A};	  
+	uint8_t cmd[] = {cmdWRITE , 0x00, 0x01, 0x0A};	  
 //page address begins with xxxx xxxx xxxx 0000 and ends with xxxx xxxx xxxx 1111 => implementar algum metodo de segurança para verificar fim de cada pagina	
 	eepromWriteEnable();
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
@@ -170,12 +165,25 @@ int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset){ //for now writes on
 }
 
 int eepromRead(uint8_t *buf, uint8_t cnt, uint16_t offset){
-	uint8_t cmd[] = {cmdREAD, 0x00, 0x02};
-	uint8_t res[1];
+	uint8_t cmd[] = {cmdREAD, 0x00, 0x01, 0x00};
+	uint8_t res[]= {0x00, 0x00, 0x00, 0x00};
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
 	spiReadWrite(SPI2 , res, cmd, 4, SPI_SLOW);
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
-	return res[1];
+	return res[3];
 }
 
 ////-----------------------depois passar todo codigo relativo a eeprom para uma função externa
+
+
+
+
+void Delay(uint32_t nTime){
+	TimingDelay = nTime;
+	while(TimingDelay != 0);
+}
+
+void SysTick_Handler(void){
+	if(TimingDelay !=0x00)
+	TimingDelay--;
+}

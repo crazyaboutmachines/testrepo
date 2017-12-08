@@ -4,6 +4,7 @@
 	Rever codigo de outros exerccios ate agora feitos para estarem realmente reutilizaveis
 	Github push
 	Aplicar a formatação das bibliotecas da ST
+	Tratar dos warnings todos (tb de tutoriais anteriores)
 */
 
 #include <stm32f10x.h>
@@ -64,13 +65,13 @@ void main()
 uint8_t txbufa[16]={0x0F,0x0E,0x0D,0x0C,0x0B,0x0A,0x09,0x08,0x07,0x06,0x05,0x04,0x03,0x02,0x01,0x00};
 uint8_t rxbufa[16]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-	eepromWrite(&txbufa, 1, 0x01F4);
+	eepromWrite(&txbufa, 16, 0x0020);
 
 	Delay(1000); //monte de tempo
 
-	eepromRead(&rxbufa, 1, 0x01F4);
+	eepromRead(&rxbufa, 1, 0x0020); //500==0x01F4
 
-	if(rxbufa[0]==0x0F){	//End of execution indicator
+	if((rxbufa[0]==0x0F)){	//End of execution indicator
 		GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit_SET);
 	}else{
 		GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit_RESET);
@@ -136,11 +137,15 @@ void eepromWriteEnable(){
   * @retval ? 
   */
 int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset){
-	uint8_t cmd[] = {cmdWRITE , (offset>>8), (offset&0x00FF), *buf}; //uint8_t cmd[] = {cmdWRITE , (offset>>8), (offset&0x00FF), 0x05};
-	//page: [xxxx xxxx xxxx 0000; xxxx xxxx xxxx 1111] => implementar algum metodo de segurança para 		verificar fim de cada pagina	
+
+	uint8_t cmd[19] = {cmdWRITE , (offset>>8), (offset&0x00FF), *buf};
+	//page: [xxxx xxxx xxxx 0000; xxxx xxxx xxxx 1111] => implementar algum metodo de segurança para 		verificar fim de cada pagina ou passar automaticamente para a proxima pagina
+
+memcpy(&cmd[3],buf,16); //usar cnt!!!
+	
 	eepromWriteEnable();
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
-	spiReadWrite(SPI2 , 0, cmd, 4, SPI_SLOW);
+	spiReadWrite(SPI2 , 0, cmd, (3+cnt), SPI_SLOW);
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
 	return 0;
 }
@@ -148,13 +153,18 @@ int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset){
 /**
   * @}
   */
-int eepromRead(uint8_t *buf, uint8_t cnt, uint16_t offset){
-	uint8_t cmd[] = {cmdREAD, (offset>>8), (offset&0x00FF), 0xFF};
-	uint8_t res[]= {0x00, 0x00, 0x00, 0x00};
+int eepromRead(uint8_t *buf, uint8_t cnt, uint16_t offset){  // o read nao tem aquele limite de 16 bites??
+	uint8_t cmd[] = {cmdREAD, (offset>>8), (offset&0x00FF)};	
+	//uint8_t res[(3+cnt)];
+	uint8_t res[]={0,0,0,0};
+
+cnt=1;
+
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
-	spiReadWrite(SPI2 , res, cmd, 4, SPI_SLOW);
+	spiReadWrite(SPI2 , res, cmd, (3+cnt), SPI_SLOW);  //podia-se mandar directamente buf para aqui sem criar o res?
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
-	*buf=res[3];
+*buf=res[3];	
+//buf=&res[3];
 	return 0;
 }
 

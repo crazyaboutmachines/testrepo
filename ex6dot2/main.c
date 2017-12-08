@@ -69,7 +69,7 @@ uint8_t rxbufa[16]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 
 	Delay(1000); //monte de tempo
 
-	eepromRead(&rxbufa, 1, 0x0020); //500==0x01F4
+	eepromRead(&rxbufa, 16, 0x0020);
 
 	if((rxbufa[0]==0x0F)){	//End of execution indicator
 		GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit_SET);
@@ -138,10 +138,10 @@ void eepromWriteEnable(){
   */
 int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset){
 
-	uint8_t cmd[19] = {cmdWRITE , (offset>>8), (offset&0x00FF), *buf};
+	uint8_t cmd[19] = {cmdWRITE , (offset>>8), (offset&0x00FF), 0};
 	//page: [xxxx xxxx xxxx 0000; xxxx xxxx xxxx 1111] => implementar algum metodo de segurança para 		verificar fim de cada pagina ou passar automaticamente para a proxima pagina
 
-memcpy(&cmd[3],buf,16); //usar cnt!!!
+memcpy(&cmd[3],buf,cnt);
 	
 	eepromWriteEnable();
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
@@ -156,15 +156,19 @@ memcpy(&cmd[3],buf,16); //usar cnt!!!
 int eepromRead(uint8_t *buf, uint8_t cnt, uint16_t offset){  // o read nao tem aquele limite de 16 bites??
 	uint8_t cmd[] = {cmdREAD, (offset>>8), (offset&0x00FF)};	
 	//uint8_t res[(3+cnt)];
-	uint8_t res[]={0,0,0,0};
+	uint8_t res[19]={0,0,0,0}; //implementar um malloc ou assim p isto
+int i;
 
-cnt=1;
+memcpy(&res[3],buf,cnt);
 
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
 	spiReadWrite(SPI2 , res, cmd, (3+cnt), SPI_SLOW);  //podia-se mandar directamente buf para aqui sem criar o res?
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
-*buf=res[3];	
-//buf=&res[3];
+//*buf=res[3];	 ou passar isto para um ciclo for
+ 
+	for(i=0;i<cnt;i++){
+		*(buf+i)=res[3+i];
+	}
 	return 0;
 }
 

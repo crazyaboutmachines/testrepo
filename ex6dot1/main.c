@@ -40,6 +40,7 @@ void main()
 				assert_failed(__FILE__ , __LINE__);
 	}
 //Loop-back for SPI in 16 bit mode
+/*
 	for (i = 0; i < 8; i++) {
 		for (j = 0; j < 4; j++)
 			txbuf16[j] = i*4 + j + (i << 8);
@@ -50,7 +51,7 @@ void main()
 			if (rxbuf16[j] != txbuf16[j])
 				assert_failed(__FILE__ , __LINE__);
 	}
-
+*/
 	GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit_SET); //End of execution indicator
 }
 

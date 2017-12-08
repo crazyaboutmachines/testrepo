@@ -3,6 +3,7 @@
 	Imprementar defines das constantes que estao no codigo do livro
 	Rever codigo de outros exerccios ate agora feitos para estarem realmente reutilizaveis
 	Github push
+	Aplicar a formatação das bibliotecas da ST
 */
 
 #include <stm32f10x.h>
@@ -17,7 +18,10 @@ uint16_t txbuf16[4], rxbuf16[4];
 enum eepromCMD { cmdREAD = 0x03, cmdWRITE = 0x02,
 		cmdWREN = 0x06, cmdWRDI = 0x04,
 		cmdRDSR = 0x05, cmdWRSR = 0x01 };
-
+#define EEPROM_PORT GPIOC
+#define EEPROM_CS GPIO_Pin_3
+#define EEPROM_SPEED SPI_SLOW
+#define EEPROM_SPI SPI2
 #define WIP(x) ((x) & 1)
 
 void eepromInit();	//prototipo dado
@@ -56,18 +60,17 @@ void main()
 	//Configure SysTick Timer
 	if (SysTick_Config(SystemCoreClock/1000)) while(1);
 
-	//Program execution
-	eepromWriteEnable();
-	Delay(250);
-	StatusRegister=eepromReadStatus();
+	//Program execution-------------------------------------------------------
+uint8_t txbufa=0x06;
+uint8_t rxbufa=0x00;
 
-	eepromWrite(0, 0, 0);
+	eepromWrite(&txbufa, 1, 0x01F4);
 
 	Delay(1000); //monte de tempo
 
-	aux=eepromRead(0, 0, 0);
+	eepromRead(&rxbufa, 1, 0x01F4);
 
-	if(aux==0x05){	//End of execution indicator
+	if(rxbufa==0x06){	//End of execution indicator
 		GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit_SET);
 	}else{
 		GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit_RESET);
@@ -101,63 +104,58 @@ void SysTick_Handler(void){
 
 
 //-----------------------depois passar todo codigo relativo a eeprom para uma função externa
-uint8_t eepromReadStatus() {	//funsao dada
+/**
+  * @}
+  */
+uint8_t eepromReadStatus() {
 	uint8_t cmd[] = {cmdRDSR , 0xff};
 	uint8_t res[2];
-	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
-	spiReadWrite(SPI2 , res, cmd, 2, SPI_SLOW);
-	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
+	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 0);
+	spiReadWrite(EEPROM_SPI , res, cmd, 2, EEPROM_SPEED);
+	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 1);
 	return res[1];
 }
-/*
-uint8_t eepromReadStatus() {
-uint8_t cmd[] = {cmdRDSR , 0xff};
-uint8_t res[2];
-GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 0);
-spiReadWrite(EEPROM_SPI , res, cmd, 2, EEPROM_SPEED);
-GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 1);
-return res[1];
-}
-*/
 
-
-void eepromWriteEnable(){	//funsao dada
-	uint8_t cmd = cmdWREN;
-	while (WIP(eepromReadStatus()));
-	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
-	spiReadWrite(SPI2 , 0, &cmd, 1, SPI_SLOW);
-	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
-}
-/*
-#define WIP(x) ((x) & 1)
+/**
+  * @}
+  */
 void eepromWriteEnable(){
-uint8_t cmd = cmdWREN;
-while (WIP(eepromReadStatus()));
-GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 0);
-spiReadWrite(EEPROM_SPI , 0, &cmd, 1, EEPROM_SPEED);
-GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 1);
+	uint8_t cmd = cmdWREN;
+	while (WIP(eepromReadStatus()));	//So se pode escrever quando a flag WIP do estatus register for 0
+	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 0);
+	spiReadWrite(EEPROM_SPI , 0, &cmd, 1, EEPROM_SPEED);
+	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 1);
 }
-*/
 
-
-
-int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset){ //for now writes only one byte
-	uint8_t cmd[] = {cmdWRITE , 0x00, 0x10, 0x05};
-	//page address begins with xxxx xxxx xxxx 0000 and ends with xxxx xxxx xxxx 1111 => implementar algum metodo de segurança para 		verificar fim de cada pagina	
-//	eepromWriteEnable();   // para já esta a ser feito no proprio main
+/**
+  * @brief  Writes on eeprom memory
+  * @note   For now writes only one byte without end of page measures.
+  * @param  *buf: ponteiro para vector de dados a escrever.
+  * @param  cnt: nº de bytes a escrever (tamanho de buf[]). 
+  * @param  offset: adress da eprom a escrever.   
+  * @retval ? 
+  */
+int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset){
+	uint8_t cmd[] = {cmdWRITE , (offset>>8), (offset&0x00FF), *buf}; //uint8_t cmd[] = {cmdWRITE , (offset>>8), (offset&0x00FF), 0x05};
+	//page: [xxxx xxxx xxxx 0000; xxxx xxxx xxxx 1111] => implementar algum metodo de segurança para 		verificar fim de cada pagina	
+	eepromWriteEnable();
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
 	spiReadWrite(SPI2 , 0, cmd, 4, SPI_SLOW);
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
 	return 0;
 }
 
+/**
+  * @}
+  */
 int eepromRead(uint8_t *buf, uint8_t cnt, uint16_t offset){
-	uint8_t cmd[] = {cmdREAD, 0x00, 0x10, 0xFF};
+	uint8_t cmd[] = {cmdREAD, (offset>>8), (offset&0x00FF), 0xFF};
 	uint8_t res[]= {0x00, 0x00, 0x00, 0x00};
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 0);
 	spiReadWrite(SPI2 , res, cmd, 4, SPI_SLOW);
 	GPIO_WriteBit(GPIOC , GPIO_Pin_3 , 1);
-	return res[3];
+	*buf=res[3];
+	return 0;
 }
 
 /*
@@ -171,7 +169,21 @@ void eepromWriteDisable(){
 
 void eepromWriteStatus(uint8_t status){
 }
-
-
 */
+
+
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
 

@@ -15,48 +15,59 @@
 #include <spi.h>
 #include <eeprom.h>
 
-
 /**
-  * @}
+  * @brief  Initializes eeprom interface peripherals.
+  * @note   For now fixed to SPI2 peripheral and GPIOC_3 pin.
+  * @param  None.   
+  * @retval None. 
   */
 void eepromInit(){
-	//csInit();
-	//Configure Pins
+	//cs pin init
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_StructInit(&GPIO_InitStructure);
-	
 	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_2MHz;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
-
+	//spi init
 	spiInit(SPI2);
 }
 
 /**
-  * @}
+  * @brief  Enables eeprom write bit from status register.
+  * @note   Same as using eepromWriteStatus(0bxxxxxx1x).
+  * @param  None.   
+  * @retval None. 
   */
 void eepromWriteEnable(){
 	uint8_t cmd = cmdWREN;
-	while (WIP(eepromReadStatus()));	//So se pode escrever quando a flag WIP do estatus register for 0
+	//check write in progress status
+	while (WIP(eepromReadStatus()));
 	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 0);
 	spiReadWrite(EEPROM_SPI , 0, &cmd, 1, EEPROM_SPEED);
 	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 1);
 }
 
 /**
-  * @}
+  * @brief  Disables eeprom write bit from status register.
+  * @note   Same as using eepromWriteStatus(0bxxxxxx0x).
+  * @param  None.   
+  * @retval None. 
   */
 void eepromWriteDisable(){ 
 	uint8_t cmd = cmdWRDI;
-	while (WIP(eepromReadStatus()));	//So se pode escrever quando a flag WIP do estatus register for 0
+	//check write in progress status
+	while (WIP(eepromReadStatus()));
 	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 0);
 	spiReadWrite(EEPROM_SPI , 0, &cmd, 1, EEPROM_SPEED);
 	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 1);
 }
 
 /**
-  * @}
+  * @brief  Reads eeprom status register.
+  * @note   None.
+  * @param  None.
+  * @retval Eeprom status register byte. 
   */
 uint8_t eepromReadStatus() {
 	uint8_t cmd[] = {cmdRDSR , 0xff};
@@ -68,22 +79,26 @@ uint8_t eepromReadStatus() {
 }
 
 /**
-  * @}
+  * @brief  Writes on eeprom status register.
+  * @note   None.
+  * @param  status: byte of data to write to eeprom status register.
+  * @retval None.
   */
 void eepromWriteStatus(uint8_t status){
 	uint8_t cmd[] = {cmdWRSR, status};
-	while (WIP(eepromReadStatus()));	//So se pode escrever quando a flag WIP do estatus register for 0
+	//check write in progress status
+	while (WIP(eepromReadStatus()));
 	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 0);
 	spiReadWrite(EEPROM_SPI , 0, cmd, 2, EEPROM_SPEED);
 	GPIO_WriteBit(EEPROM_PORT , EEPROM_CS , 1);
 }
 
 /**
-  * @brief  Writes on eeprom memory
+  * @brief  Writes on eeprom memory.
   * @note   For now writes only one byte without end of page measures.
-  * @param  *buf: ponteiro para vector de dados a escrever.
-  * @param  cnt: nº de bytes a escrever (tamanho de buf[]). 
-  * @param  offset: adress da eprom a escrever.   
+  * @param  *buf: pointer to data to be written in eeprom.
+  * @param  cnt: number of bytes to be writen (size of buf[]). 
+  * @param  offset: eeprom addres to start writing.   
   * @retval ? 
   */
 int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset){
@@ -101,7 +116,12 @@ int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset){
 }
 
 /**
-  * @}
+  * @brief  Reads from eeprom memory.
+  * @note   None.
+  * @param  *buf: pointer to vector of read data.
+  * @param  cnt: number of bytes to be read. 
+  * @param  offset: adress of eeprom to start reading.   
+  * @retval ? 
   */
 int eepromRead(uint8_t *buf, uint8_t cnt, uint16_t offset){  // o read nao tem aquele limite de 16 bites??
 	uint8_t cmd[] = {cmdREAD, (offset>>8), (offset&0x00FF)};	

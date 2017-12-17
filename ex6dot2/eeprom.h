@@ -1,5 +1,16 @@
-#ifndef NOMEQUALQUEREEPROM
-#define NOMEQUALQUEREEPROM
+/**
+  ******************************************************************************
+  * @file	eeprom.h
+  * @author	Gerardo de Lima
+  * @version 	V0
+  * @date   	17-Dez-2017
+  * @brief	This file contains all the functions prototypes for the eeprom P.N. 
+		25xx160.
+  ******************************************************************************
+  */
+
+#ifndef EEPROM_H
+#define EEPROM_H
 
 #include <stm32f10x.h>
 #include <stm32f10x_rcc.h>
@@ -25,3 +36,17 @@ int eepromWrite(uint8_t *buf, uint8_t cnt, uint16_t offset);
 int eepromRead(uint8_t *buf, uint8_t cnt, uint16_t offset);
 
 #endif
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/************************END OF FILE****/

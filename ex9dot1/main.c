@@ -17,11 +17,6 @@ Lembrar de aplicar bibliotecas matematicas
 
 void Delay(uint32_t nTime);
 
-//char frase[]="Hello World!\n\r";
-char frase[]="\n\rJX: \tJY: \tAX: \tAY: \tAZ: \tC: \tZ:\n\r";
-
-int i, JX=1, JY=2, AX=3, AY=4, AZ=5, C=6, Z=7;
-
 int main(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -54,10 +49,8 @@ I2C_Write(I2C1 , buf2 , 2, NUNCHUK_ADDRESS);
 uint8_t data[6];
 const uint8_t buf3[] = {0};
 
-
- char buffer [50];
-//n=sprintf(buffer, "%d plus %d is %d", a, b, a+b);
-//n=sprintf(buffer, "\n\rJX:%d \tJY:%d \tAX:%d \tAY:%d \tAZ:%d \tC:%d \tZ:%d \n\r", JX, JY, AX, AY, AZ, C, Z); //Had to add line: "LDFLAGS+= -specs=nosys.specs" on local makefile for this to work
+int i, n, JX, JY, AX, AY, AZ, C, Z;
+char buffer [60];
 
 //--------------------------------------------------------------------
 
@@ -68,17 +61,13 @@ const uint8_t buf3[] = {0};
 
 	JX=data[0];
 	JY=data[1];
-
-
-	//AX=((data[5]&0b00001100)>>2)+(data[2]<<2);
-
-	//AX=1000;
+	AX=((data[5]&0b00001100)>>2)+(data[2]<<2);
 	AY=((data[5]&0b00110000)>>4)+(data[3]<<2);
 	AZ=((data[5]&0b11000000)>>6)+(data[4]<<2);
-
 	C=1-((data[5]&0b00000010)>>1);
 	Z=1-(data[5]&0b00000001);
-	sprintf(buffer, "JX:%d \tJY:%d \tAX:%d \tAY:%d \tAZ:%d \tC:%d \tZ:%d \n\r", JX, JY, AX, AY, AZ, C, Z);
+
+	n=sprintf(buffer, "JX:%d \tJY:%d \tAX:%d \tAY:%d \tAZ:%d \tC:%d \tZ:%d \n\r", JX, JY, AX, AY, AZ, C, Z);
 
 	Delay(250); // wait 250 ms
 
@@ -87,7 +76,7 @@ const uint8_t buf3[] = {0};
 	GPIO_WriteBit(GPIOC, GPIO_Pin_9, (ledval) ? Bit_SET : Bit_RESET);
 	ledval = 1-ledval;
 	//send character
-	for (i=0; i<sizeof(buffer); i++) {
+	for (i=0; i<n; i++) {
 		uart_putc(buffer[i], USART1);
 	}
 	}

@@ -1,3 +1,13 @@
+/**
+  ******************************************************************************
+  * @file	i2c.h
+  * @author	File from Gerardo de Lima (code from Geoffrey Brown @ Discovering the STM32 Microcontroller) 
+  * @version 	V0
+  * @date   	24-Dez-2017
+  * @brief	This file contains prototypes for some i2c basic functionality.
+  ******************************************************************************
+  */
+
 #ifndef I2C_H
 #define I2C_H
 
@@ -16,3 +26,17 @@ Status I2C_Write(I2C_TypeDef* I2Cx , const uint8_t* buf, uint32_t nbyte , uint8_
 Status I2C_Read(I2C_TypeDef* I2Cx , uint8_t *buf, uint32_t nbyte , uint8_t SlaveAddress);
 
 #endif
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/************************END OF FILE****/

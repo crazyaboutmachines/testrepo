@@ -1,11 +1,27 @@
+/**
+  ******************************************************************************
+  * @file	i2c.c
+  * @author	File from Gerardo de Lima (code from Geoffrey Brown @ Discovering the STM32 Microcontroller)
+  * @version	V0
+  * @date   	24-Dez-2017
+  * @brief	This file contains functions for some i2c basic functionality.
+  ******************************************************************************
+  */
+
 #include <stm32f10x.h>
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_gpio.h>
 #include <stm32f10x_i2c.h>
 #include "i2c.h"
 
-
-
+/**
+  * @brief  Initializes I2C at low level using STM peripheral libraries.
+  * @note   Based on AN2824.
+  * @param  I2Cx: I2C peripheral to use.
+  * @param  ClockSpeed: I2C clock speed to use. 
+  * @param  OwnAddress: For defining own I2C addres.   
+  * @retval None.
+  */
 void I2C_LowLevel_Init(I2C_TypeDef* I2Cx , int ClockSpeed , int OwnAddress)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -42,7 +58,15 @@ void I2C_LowLevel_Init(I2C_TypeDef* I2Cx , int ClockSpeed , int OwnAddress)
 }
 
 
-
+/**
+  * @brief  Implements I2C writes.
+  * @note   Based on AN2824.
+  * @param  I2Cx: I2C peripheral to use.
+  * @param  buf: Pointer to data to be writen.
+  * @param  nbyte: Number of bytes to write.  
+  * @param  SlaveAddress: Slave addres of which to read. 
+  * @retval Status.
+  */
 Status I2C_Write(I2C_TypeDef* I2Cx , const uint8_t* buf, uint32_t nbyte , uint8_t SlaveAddress) 
 {
 	__IO uint32_t Timeout = 0;
@@ -67,13 +91,21 @@ Status I2C_Write(I2C_TypeDef* I2Cx , const uint8_t* buf, uint32_t nbyte , uint8_
 		Timed(I2C_GetFlagStatus(I2C1 , I2C_FLAG_STOPF));
 	}
 	return Success;
-errReturn:
+	errReturn:
 	return Error;
 }
 
 
-
-Status I2C_Read(I2C_TypeDef* I2Cx , uint8_t *buf, uint32_t nbyte , uint8_t SlaveAddress) 
+/**
+  * @brief  Implements I2C reads.
+  * @note   Based on AN2824.
+  * @param  I2Cx: I2C peripheral to use.
+  * @param  *buf: Pointer to bucket of data.
+  * @param  nbyte: Number of bytes to read.
+  * @param  SlaveAddress: Slave addres of which to read.
+  * @retval Status.
+  */
+Status I2C_Read(I2C_TypeDef* I2Cx , uint8_t *buf, uint32_t nbyte, uint8_t SlaveAddress) 
 {
 	__IO uint32_t Timeout = 0;
 	if (!nbyte)
@@ -90,8 +122,7 @@ Status I2C_Read(I2C_TypeDef* I2Cx , uint8_t *buf, uint32_t nbyte , uint8_t Slave
 	I2C_Send7bitAddress(I2Cx , SlaveAddress , I2C_Direction_Receiver);
 	// EV6
 	Timed(!I2C_GetFlagStatus(I2Cx , I2C_FLAG_ADDR));
-	if (nbyte == 1) { /* read 1 byte ----------------------------------------------------------------*/ 
-
+	if (nbyte == 1) { // read 1 byte 
 		// Clear Ack bit
 		I2C_AcknowledgeConfig(I2Cx , DISABLE);
 		// EV6_1 -- must be atomic -- Clear ADDR , generate STOP
@@ -102,10 +133,8 @@ Status I2C_Read(I2C_TypeDef* I2Cx , uint8_t *buf, uint32_t nbyte , uint8_t Slave
 		// Receive data EV7
 		Timed(!I2C_GetFlagStatus(I2Cx , I2C_FLAG_RXNE));
 		*buf++ = I2C_ReceiveData(I2Cx);
-
 	}
-	else if (nbyte == 2) { /* read 2 bytes ----------------------------------------------------------------*/ 
-
+	else if (nbyte == 2) { // read 2 bytes 
 		// Set POS flag
 		I2C_NACKPositionConfig(I2Cx , I2C_NACKPosition_Next);
 		// EV6_1 -- must be atomic and in this order
@@ -120,10 +149,8 @@ Status I2C_Read(I2C_TypeDef* I2Cx , uint8_t *buf, uint32_t nbyte , uint8_t Slave
 		*buf++ = I2Cx ->DR;
 		__enable_irq();
 		*buf++ = I2Cx ->DR;
-
 	}
-	else { /* read 3 or more bytes ----------------------------------------------------------------*/ 
-
+	else { 	// read 3 or more bytes
 		(void) I2Cx ->SR2; // Clear ADDR flag
 		while (nbyte -- != 3)
 		{
@@ -144,7 +171,6 @@ Status I2C_Read(I2C_TypeDef* I2Cx , uint8_t *buf, uint32_t nbyte , uint8_t Slave
 		Timed(!I2C_CheckEvent(I2Cx , I2C_EVENT_MASTER_BYTE_RECEIVED));
 		*buf++ = I2C_ReceiveData(I2Cx);
 		nbyte = 0;
-
 	}
 	// Wait for stop
 	Timed(I2C_GetFlagStatus(I2Cx , I2C_FLAG_STOPF));
@@ -153,3 +179,16 @@ Status I2C_Read(I2C_TypeDef* I2Cx , uint8_t *buf, uint32_t nbyte , uint8_t Slave
 	return Error;
 }
 
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/************************END OF FILE****/

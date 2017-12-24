@@ -4,6 +4,8 @@ TEMPLATEROOT = ../../template/STM32-Template
 
 CFLAGS  = -O0 -g
 ASFLAGS = -g 
+LDLIBS += -lm
+LDFLAGS+= -specs=nosys.specs
 
 # object files
 

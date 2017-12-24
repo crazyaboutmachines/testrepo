@@ -1,13 +1,26 @@
+
+/*
+Ver meneira de utilizar o sprintf
+Lembrar de aplicar bibliotecas matematicas
+
+*/
+
+
+
 #include <stm32f10x.h>
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_gpio.h>
 #include "uart.h"
 #include "i2c.h"
+#include <stdio.h> //Add: "LDLIBS += -lm" on local Makefile
+#include <math.h> //Add: "LDLIBS += -lm" on local Makefile
 
 void Delay(uint32_t nTime);
 
-char frase[]="Hello World!\n\r";
-int i;
+//char frase[]="Hello World!\n\r";
+char frase[]="\n\rJX: \tJY: \tAX: \tAY: \tAZ: \tC: \tZ:\n\r";
+
+int i, JX=1, JY=2, AX=3, AY=4, AZ=5, C=6, Z=7;
 
 int main(void)
 {
@@ -40,38 +53,43 @@ I2C_Write(I2C1 , buf2 , 2, NUNCHUK_ADDRESS);
 
 uint8_t data[6];
 const uint8_t buf3[] = {0};
+
+
+ char buffer [50];
+//n=sprintf(buffer, "%d plus %d is %d", a, b, a+b);
+//n=sprintf(buffer, "\n\rJX:%d \tJY:%d \tAX:%d \tAY:%d \tAZ:%d \tC:%d \tZ:%d \n\r", JX, JY, AX, AY, AZ, C, Z); //Had to add line: "LDFLAGS+= -specs=nosys.specs" on local makefile for this to work
+
 //--------------------------------------------------------------------
 
 	while(1){
-	
+	// Read
+	I2C_Write(I2C1 , buf3, 1, NUNCHUK_ADDRESS);
+	I2C_Read(I2C1 , data , 6, NUNCHUK_ADDRESS);
 
-//I2Ccode:------------------------------------------------------------
-Delay(500); // wait 250 ms
-
-
-// Read
-I2C_Write(I2C1 , buf3, 1, NUNCHUK_ADDRESS);
-I2C_Read(I2C1 , data , 6, NUNCHUK_ADDRESS);
-
-Delay(500);
-//--------------------------------------------------------------------
+	JX=data[0];
+	JY=data[1];
 
 
+	//AX=((data[5]&0b00001100)>>2)+(data[2]<<2);
 
+	//AX=1000;
+	AY=((data[5]&0b00110000)>>4)+(data[3]<<2);
+	AZ=((data[5]&0b11000000)>>6)+(data[4]<<2);
 
-static int ledval=0;
+	C=1-((data[5]&0b00000010)>>1);
+	Z=1-(data[5]&0b00000001);
+	sprintf(buffer, "JX:%d \tJY:%d \tAX:%d \tAY:%d \tAZ:%d \tC:%d \tZ:%d \n\r", JX, JY, AX, AY, AZ, C, Z);
+
+	Delay(250); // wait 250 ms
+
+	static int ledval=0;
 	//toggle led
 	GPIO_WriteBit(GPIOC, GPIO_Pin_9, (ledval) ? Bit_SET : Bit_RESET);
 	ledval = 1-ledval;
 	//send character
-	for (i=0; i<17; i++) {
-		uart_putc(frase[i], USART1);
+	for (i=0; i<sizeof(buffer); i++) {
+		uart_putc(buffer[i], USART1);
 	}
-
-	for (i=0; i<6; i++) {
-		uart_putc(data[i], USART1);
-	}
-
 	}
 }
 

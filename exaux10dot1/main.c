@@ -33,7 +33,7 @@ int main(void)
 	// 100,000/2000 = 50
 	TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
 	TIM_TimeBaseStructure.TIM_Prescaler = SystemCoreClock /100000 - 1; // 0..239
-	TIM_TimeBaseStructure.TIM_Period = 2000 - 1; // 0..999
+	TIM_TimeBaseStructure.TIM_Period = 2000 - 1; // 0..1999
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM2 , &TIM_TimeBaseStructure);
 	// PWM1 Mode configuration: Channel2

@@ -4,13 +4,12 @@ TEMPLATEROOT = ../../template/STM32-Template
 
 CFLAGS  = -O0 -g
 ASFLAGS = -g 
-LDLIBS += -lm
-LDFLAGS+= -specs=nosys.specs
 
 # object files
 
 OBJS=  $(STARTUP) main.o
-OBJS+= stm32f10x_gpio.o stm32f10x_rcc.o stm32f10x_usart.o uart.o
+OBJS+= stm32f10x_gpio.o stm32f10x_rcc.o
+OBJS+= misc.o
 OBJS+= stm32f10x_tim.o
 
 # include common make file

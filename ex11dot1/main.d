@@ -5,6 +5,5 @@ main.o: main.c \
  ../../template/STM32-Template/stm32f10x_conf.h \
  /home/gl/Desktop/E/Hardware/STM32/book/STlibs/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h \
  /home/gl/Desktop/E/Hardware/STM32/book/STlibs/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_gpio.h \
- uart.h \
- /home/gl/Desktop/E/Hardware/STM32/book/STlibs/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_usart.h \
+ /home/gl/Desktop/E/Hardware/STM32/book/STlibs/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc/misc.h \
  /home/gl/Desktop/E/Hardware/STM32/book/STlibs/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_tim.h

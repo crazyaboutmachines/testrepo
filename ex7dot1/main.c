@@ -68,11 +68,11 @@ int main(void)
 */
 
 fillScreen(0xF800);
-Delay(1000);
+Delay(5000);
 fillScreen(0x07E0);
-Delay(1000);
+Delay(5000);
 fillScreen(0x001F);
-Delay(1000);
+Delay(5000);
 
 //------------------------------
 	}

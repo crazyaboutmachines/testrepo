@@ -14,48 +14,48 @@ struct ST7735_cmdBuf {
 
 static const struct ST7735_cmdBuf initializers[] = {
 	// SWRESET Software reset
-	{ 0x01, 150, 0, 0},
+	{ 0x01, 150, 0, 0}, //ok
 	// SLPOUT Leave sleep mode
-	{ 0x11, 150, 0, 0},
+	{ 0x11, 150, 0, 0}, //ok
 	// FRMCTR1 , FRMCTR2 Frame Rate configuration -- Normal mode , idle
 	// frame rate = fosc / (1 x 2 + 40) * (LINE + 2C + 2D)
-	{ 0xB1, 0, 3, { 0x01, 0x2C, 0x2D }},
-	{ 0xB2, 0, 3, { 0x01, 0x2C, 0x2D }},
+	{ 0xB1, 0, 3, { 0x01, 0x2C, 0x2D }},//ok
+	{ 0xB2, 0, 3, { 0x01, 0x2C, 0x2D }}, //not used
 	// FRMCTR3 Frame Rate configureation -- partial mode
-	{ 0xB3, 0, 6, { 0x01, 0x2C, 0x2D, 0x01, 0x2C, 0x2D }},
+	{ 0xB3, 0, 6, { 0x01, 0x2C, 0x2D, 0x01, 0x2C, 0x2D }}, //not used
 	// INVCTR Display inversion (no inversion)
-	{ 0xB4, 0, 1, { 0x07 }},
+	{ 0xB4, 0, 1, { 0x07 }},//ok
 	// PWCTR1 Power control -4.6V, Auto mode
-	{ 0xC0, 0, 3, { 0xA2, 0x02, 0x84}},
+	{ 0xC0, 0, 3, { 0xA2, 0x02, 0x84}},//ok
 	// PWCTR2 Power control VGH25 2.4C, VGSEL -10, VGH = 3 * AVDD
-	{ 0xC1, 0, 1, { 0xC5}},
+	{ 0xC1, 0, 1, { 0xC5}}, //ok
 	// PWCTR3 Power control , opamp current smal , boost frequency
-	{ 0xC2, 0, 2, { 0x0A, 0x00 }},
+	{ 0xC2, 0, 2, { 0x0A, 0x00 }}, //ok
 	// PWCTR4 Power control , BLK/2, opamp current small and medium low
-	{ 0xC3, 0, 2, { 0x8A, 0x2A}},
+	{ 0xC3, 0, 2, { 0x8A, 0x2A}},  //not used
 	// PWRCTR5 , VMCTR1 Power control
-	{ 0xC4, 0, 2, { 0x8A, 0xEE}},
-	{ 0xC5, 0, 1, { 0x0E }},
+	{ 0xC4, 0, 2, { 0x8A, 0xEE}},   //not used
+	{ 0xC5, 0, 1, { 0x0E }}, //ok
 	// INVOFF Don't invert display
-	{ 0x20, 0, 0, 0},
+	{ 0x20, 0, 0, 0}, //not used
 	// Memory access directions. row address/col address , bottom to top refesh (10.1.27)
-	{ ST7735_MADCTL , 0, 1, {MADVAL(MADCTLGRAPHICS)}},
+	{ ST7735_MADCTL , 0, 1, {MADVAL(MADCTLGRAPHICS)}},  //ST7735_MADCTL==0x36   ok
 	// Color mode 16 bit (10.1.30
-	{ ST7735_COLMOD , 0, 1, {0x05}},
+	{ ST7735_COLMOD , 0, 1, {0x05}}, //ST7735_COLMOD==0x3A   ok
 	// Column address set 0..127
-	{ ST7735_CASET , 0, 4, {0x00, 0x00, 0x00, 0x7F }},
+	{ ST7735_CASET , 0, 4, {0x00, 0x00, 0x00, 0x7F }}, //ST7735_CASET==0x2A   ok
 	// Row address set 0..159
-	{ ST7735_RASET , 0, 4, {0x00, 0x00, 0x00, 0x9F }},
+	{ ST7735_RASET , 0, 4, {0x00, 0x00, 0x00, 0x9F }}, //ST7735_RASET==0x2B   ok
 	// GMCTRP1 Gamma correction
-	{ 0xE0, 0, 16, {0x02, 0x1C, 0x07, 0x12, 0x37, 0x32, 0x29, 0x2D, 0x29, 0x25, 0x2B, 0x39, 0x00, 0x01, 0x03, 0x10 }},
+	{ 0xE0, 0, 16, {0x02, 0x1C, 0x07, 0x12, 0x37, 0x32, 0x29, 0x2D, 0x29, 0x25, 0x2B, 0x39, 0x00, 0x01, 0x03, 0x10 }}, //ok
 	// GMCTRP2 Gamma Polarity corrction
-	{ 0xE1, 0, 16, {0x03, 0x1d, 0x07, 0x06, 0x2E, 0x2C, 0x29, 0x2D, 0x2E, 0x2E, 0x37, 0x3F, 0x00, 0x00, 0x02, 0x10 }},
+	{ 0xE1, 0, 16, {0x03, 0x1d, 0x07, 0x06, 0x2E, 0x2C, 0x29, 0x2D, 0x2E, 0x2E, 0x37, 0x3F, 0x00, 0x00, 0x02, 0x10 }}, //ok
 	// DISPON Display on
-	{ 0x29, 100, 0, 0},
+	{ 0x29, 100, 0, 0},  //ok
 	// NORON Normal on
-	{ 0x13, 10, 0, 0},
+	{ 0x13, 10, 0, 0}, //ok
 	// End
-	{ 0, 0, 0, 0}
+	{ 0, 0, 0, 0} //not used
 };
 
 //-------------------------ST7735 Internal Primitives
@@ -112,10 +112,9 @@ void ST7735_init()
 	// set up pins--------------------------------------------------
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_StructInit(&GPIO_InitStructure);
-//Enable Peripheral Clocks
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA| RCC_APB2Periph_GPIOC, ENABLE);
-
-//Configure Pins
+	//Enable Peripheral Clocks
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA| RCC_APB2Periph_GPIOC, ENABLE);
+	//Configure Pins
 	//BKL
 	GPIO_InitStructure.GPIO_Pin=GPIO_PIN_BKL;
 	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP;

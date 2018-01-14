@@ -1,15 +1,23 @@
 /*
+* Ver o porque daquelas linhas pretas horizontais
+* Ver porque o backlight nao esta a funcionar
 *
-*Completar aquelas inicializações de pinos
-*Tentar ja fazer algo no main
+*Reconstruir vector initializers[] baseado no codigo do arduino
+*Procurar por diferentes delays na escrita de comandos de inicialização
 *
-*Ver onde por aquelas estruturas
-*
-*
-*
-*
+* Dar uma olhada em bibliotecas de graficos tipo Adafruit_GFX lib
+* Problema na velocidade SPI que estou a usar?
 */
 
+
+/*
+*Adafruit lib: https://github.com/adafruit/Adafruit-ST7735-Library
+*Arduino LCD page: https://store.arduino.cc/arduino-lcd-screen
+*Adafruit LCD page: https://www.adafruit.com/product/358
+*
+*Experimentar comandos para o Bscreen
+*Esperimentar com um arduino e depois de ter certeza de funcionamento do LCD re-examinar codigo
+*/
 
 #include <stm32f10x.h>
 #include <stm32f10x_rcc.h>
@@ -37,6 +45,7 @@ int main(void)
 
 	//init LCD
 	ST7735_init();
+	ST7735_backLight(0xFF);
 
 	while(1){
 		static int ledval=0;
@@ -44,21 +53,27 @@ int main(void)
 		GPIO_WriteBit(GPIOC, GPIO_Pin_9, (ledval) ? Bit_SET : Bit_RESET);
 		//GPIO_WriteBit(66, GPIO_Pin_9, (ledval) ? Bit_SET : Bit_RESET);
 		ledval = 1-ledval;
-		Delay(5000); // wait 250 ms
+		 // wait 250 ms
 
 //----------------------LCD code
 /*Sample colors:
 *0x0000 Black
-*0x001F Dark blue
-*0x07E0 Green
+*0x001F Dark blue	<-
+*0x07E0 Green	<-
 *0x07FF Light blue
-*0xF800 Red
+*0xF800 Red	<-
 *0xF81F Magenta
 *0xFFE0 Yellow
 *0xFFFF White
 */
 
+fillScreen(0xF800);
+Delay(1000);
 fillScreen(0x07E0);
+Delay(1000);
+fillScreen(0x001F);
+Delay(1000);
+
 //------------------------------
 	}
 }

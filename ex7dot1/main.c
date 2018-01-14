@@ -1,3 +1,16 @@
+/*
+*
+*Completar aquelas inicializações de pinos
+*Tentar ja fazer algo no main
+*
+*Ver onde por aquelas estruturas
+*
+*
+*
+*
+*/
+
+
 #include <stm32f10x.h>
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_gpio.h>
@@ -22,13 +35,31 @@ int main(void)
 	if (SysTick_Config(SystemCoreClock/1000))
 		while(1);
 
+	//init LCD
+	ST7735_init();
+
 	while(1){
 		static int ledval=0;
 		//toggle led
 		GPIO_WriteBit(GPIOC, GPIO_Pin_9, (ledval) ? Bit_SET : Bit_RESET);
 		//GPIO_WriteBit(66, GPIO_Pin_9, (ledval) ? Bit_SET : Bit_RESET);
 		ledval = 1-ledval;
-		Delay(250); // wait 250 ms
+		Delay(5000); // wait 250 ms
+
+//----------------------LCD code
+/*Sample colors:
+*0x0000 Black
+*0x001F Dark blue
+*0x07E0 Green
+*0x07FF Light blue
+*0xF800 Red
+*0xF81F Magenta
+*0xFFE0 Yellow
+*0xFFFF White
+*/
+
+fillScreen(0x07E0);
+//------------------------------
 	}
 }
 

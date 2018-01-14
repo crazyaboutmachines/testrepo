@@ -4,35 +4,6 @@
 #include <stm32f10x_gpio.h>
 #include <spi.h>
 
-
-
-//-----------------------simple driver
-void ST7735_setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t madctl)
-{
-	madctl = MADVAL(madctl);
-	if (madctl != madctlcurrent){
-		ST7735_writeCmd(ST7735_MADCTL);
-		LcdWrite(LCD_D , &madctl , 1);
-		madctlcurrent = madctl;
-	}
-	ST7735_writeCmd(ST7735_CASET);
-	LcdWrite16(LCD_D , &x0, 1);
-	LcdWrite16(LCD_D , &x1, 1);
-	
-	ST7735_writeCmd(ST7735_RASET);
-	LcdWrite16(LCD_D , &y0, 1);
-	LcdWrite16(LCD_D , &y1, 1);
-
-	ST7735_writeCmd(ST7735_RAMWR);
-}
-
-
-void ST7735_pushColor(uint16_t *color , int cnt)
-{
-	LcdWrite16(LCD_D , color , cnt);
-}
-
-//---------------------------------------------Estas estruturas ficam onde???
 struct ST7735_cmdBuf {
 	uint8_t command; // ST7735 command byte
 	uint8_t delay; // ms delay after
@@ -87,22 +58,94 @@ static const struct ST7735_cmdBuf initializers[] = {
 	{ 0, 0, 0, 0}
 };
 
+//-------------------------ST7735 Internal Primitives
+static void LcdWrite(char dc, const char *data , int nbytes)
+{
+	GPIO_WriteBit(LCD_PORT ,GPIO_PIN_DC , dc); // dc 1 = data , 0 =control
+	GPIO_ResetBits(LCD_PORT ,GPIO_PIN_SCE);
+	spiReadWrite(SPILCD , 0, data , nbytes , LCDSPEED);
+	GPIO_SetBits(LCD_PORT ,GPIO_PIN_SCE);
+}
+
+static void LcdWrite16(char dc, const uint16_t *data , int cnt)
+{
+	GPIO_WriteBit(LCD_PORT ,GPIO_PIN_DC , dc); // dc 1 = data , 0 =control
+	GPIO_ResetBits(LCD_PORT ,GPIO_PIN_SCE);
+	spiReadWrite16(SPILCD , 0, data , cnt, LCDSPEED);
+	GPIO_SetBits(LCD_PORT ,GPIO_PIN_SCE);
+}
+
+static void ST7735_writeCmd(uint8_t c)
+{
+	LcdWrite(LCD_C , &c, 1);
+}
+
+//-----------------------Simple driver
+void ST7735_setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t madctl)
+{
+	madctl = MADVAL(madctl);
+	if (madctl != madctlcurrent){
+		ST7735_writeCmd(ST7735_MADCTL);
+		LcdWrite(LCD_D , &madctl , 1);
+		madctlcurrent = madctl;
+	}
+	ST7735_writeCmd(ST7735_CASET);
+	LcdWrite16(LCD_D , &x0, 1);
+	LcdWrite16(LCD_D , &x1, 1);
+	
+	ST7735_writeCmd(ST7735_RASET);
+	LcdWrite16(LCD_D , &y0, 1);
+	LcdWrite16(LCD_D , &y1, 1);
+
+	ST7735_writeCmd(ST7735_RAMWR);
+}
 
 
-
-//-------------------------------------------------------------------------------------------
-
-
-
-
+void ST7735_pushColor(uint16_t *color , int cnt)
+{
+	LcdWrite16(LCD_D , color , cnt);
+}
 
 void ST7735_init()
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
 	const struct ST7735_cmdBuf *cmd;
-	// set up pins
-	/* ... */
-	// set cs, reset low
+	// set up pins--------------------------------------------------
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_StructInit(&GPIO_InitStructure);
+//Enable Peripheral Clocks
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA| RCC_APB2Periph_GPIOC, ENABLE);
+
+//Configure Pins
+	//BKL
+	GPIO_InitStructure.GPIO_Pin=GPIO_PIN_BKL;
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_2MHz;
+	GPIO_Init(LCD_PORT_BKL, &GPIO_InitStructure);
+	//RESET
+	GPIO_InitStructure.GPIO_Pin=GPIO_PIN_RST;
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_2MHz;
+	GPIO_Init(LCD_PORT, &GPIO_InitStructure);
+	//RS
+	GPIO_InitStructure.GPIO_Pin=GPIO_PIN_DC;
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_2MHz;
+	GPIO_Init(LCD_PORT, &GPIO_InitStructure);
+	//LCD CS PC0
+	GPIO_InitStructure.GPIO_Pin=GPIO_PIN_SCE;
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_2MHz;
+	GPIO_Init(LCD_PORT, &GPIO_InitStructure);
+	//SD_CS PC6
+	GPIO_InitStructure.GPIO_Pin=GPIO_PIN_SD;
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_2MHz;
+	GPIO_Init(SD_PORT, &GPIO_InitStructure);
+	//MISO, MOSI, SCLK and SPIinit
+	spiInit(SPILCD);
+
+	// set cs, reset low--------------------------------------------
+	GPIO_WriteBit(SD_PORT ,GPIO_PIN_SD , HIGH); //SD not used for now
 	GPIO_WriteBit(LCD_PORT ,GPIO_PIN_SCE , HIGH);
 	GPIO_WriteBit(LCD_PORT ,GPIO_PIN_RST , HIGH);
 	Delay(10);
@@ -124,35 +167,10 @@ void ST7735_init()
 
 void ST7735_backLight(uint8_t on)
 {
-	void ST7735_backLight(uint8_t on)
-	{
 	if (on)
 		GPIO_WriteBit(LCD_PORT_BKL ,GPIO_PIN_BKL , LOW);
 	else
 		GPIO_WriteBit(LCD_PORT_BKL ,GPIO_PIN_BKL , HIGH);
-	}
-}
-
-//-------------------------ST7735 Internal Primitives
-static void LcdWrite(char dc, const char *data , int nbytes)
-{
-	GPIO_WriteBit(LCD_PORT ,GPIO_PIN_DC , dc); // dc 1 = data , 0 =control
-	GPIO_ResetBits(LCD_PORT ,GPIO_PIN_SCE);
-	spiReadWrite(SPILCD , 0, data , nbytes , LCDSPEED);
-	GPIO_SetBits(LCD_PORT ,GPIO_PIN_SCE);
-}
-
-static void LcdWrite16(char dc, const uint16_t *data , int cnt)
-{
-	GPIO_WriteBit(LCD_PORT ,GPIO_PIN_DC , dc); // dc 1 = data , 0 =control
-	GPIO_ResetBits(LCD_PORT ,GPIO_PIN_SCE);
-	spiReadWrite16(SPILCD , 0, data , cnt, LCDSPEED);
-	GPIO_SetBits(LCD_PORT ,GPIO_PIN_SCE);
-}
-
-static void ST7735_writeCmd(uint8_t c)
-{
-	LcdWrite(LCD_C , &c, 1);
 }
 
 

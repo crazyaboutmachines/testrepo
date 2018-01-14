@@ -9,13 +9,15 @@
 #define LCD_PORT GPIOC
 #define GPIO_PIN_DC GPIO_Pin_2
 #define GPIO_PIN_SCE GPIO_Pin_0
-#define SPILCD SPI2
-#define LCDSPEED SPI_SLOW   //conforme a velocidade de clock ver se há que mudar esta velocidade
-
+#define GPIO_PIN_RST GPIO_Pin_1 //PC1
 #define LCD_PORT_BKL GPIOA
 #define GPIO_PIN_BKL GPIO_Pin_1
 
-#define GPIO_PIN_RST GPIO_Pin_1 //PC1
+#define GPIO_PIN_SD GPIO_Pin_6//optional
+#define SD_PORT GPIOC//optional
+
+#define SPILCD SPI2
+#define LCDSPEED SPI_SLOW   //conforme a velocidade de clock ver se há que mudar esta velocidade
 
 #define MADCTLGRAPHICS 0x6
 #define MADCTLBMP 0x2

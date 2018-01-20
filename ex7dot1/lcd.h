@@ -38,19 +38,16 @@
 #define MADVAL(x) (((x) << 5) | 8)
 static uint8_t madctlcurrent = MADVAL(MADCTLGRAPHICS);
 
-
-//simple driver--------------------
+//ST7735 Internal Primitives
+static void LcdWrite(char dc, const char *data , int nbytes);
+static void LcdWrite16(char dc, const uint16_t *data , int cnt);
+static void ST7735_writeCmd(uint8_t c);
+//Simple driver
 void ST7735_setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t madctl);
 void ST7735_pushColor(uint16_t *color , int cnt);
 void ST7735_init();
 void ST7735_backLight(uint8_t on);
-//ST7735 Internal Primitives----------------------------------
-
-static void LcdWrite(char dc, const char *data , int nbytes);
-static void LcdWrite16(char dc, const uint16_t *data , int cnt);
-static void ST7735_writeCmd(uint8_t c);
-
-//aditional functions---------------
+//Aditional functions
 void fillScreen(uint16_t color);
 
 #endif

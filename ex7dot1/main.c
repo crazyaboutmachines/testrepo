@@ -45,7 +45,7 @@ int main(void)
 
 	//init LCD
 	ST7735_init();
-	ST7735_backLight(0xFF);
+	ST7735_backLight(1);
 
 	while(1){
 		static int ledval=0;

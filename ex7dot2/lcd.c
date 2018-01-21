@@ -187,11 +187,17 @@ void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg
 *	*v==v[0]
 *	*(v+n)==v[n]
 */
-void drawString(int16_t x, int16_t y, unsigned char *c, uint16_t color, uint16_t bg, uint8_t size) 
+void drawString(int16_t x, int16_t y, unsigned char *c, int16_t cnt, uint16_t color, uint16_t bg, uint8_t size) 
 {
-	int i;
-	for (i=0; i < 12; i++) {
-		drawChar(20+i*6, 20, c[i], 0x07E0, 0xF800, 0);
+
+//#define ST7735_height 160
+
+	int i, auxx=x, auxy=y;
+	for (i=0; i < cnt; i++) { //falta implementar numero de caracteres na string flexivel
+		if(auxx>(ST7735_width-6)){auxy=auxy+10; auxx=0;} //end of horizontal space
+		if(auxy>(ST7735_height-10)){auxy=0; auxx=0;} //end of vertical space
+		drawChar(auxx, auxy, c[i], color, bg, 0);
+		auxx=auxx+6;	
 	}
 }
 

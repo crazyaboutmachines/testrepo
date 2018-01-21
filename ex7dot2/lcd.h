@@ -309,6 +309,6 @@ void ST7735_backLight(uint8_t on);
 //Aditional functions
 void fillScreen(uint16_t color);
 void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size);
-void drawString(int16_t x, int16_t y, unsigned char *c, uint16_t color, uint16_t bg, uint8_t size);
+void drawString(int16_t x, int16_t y, unsigned char *c, int16_t cnt, uint16_t color, uint16_t bg, uint8_t size);
 
 #endif

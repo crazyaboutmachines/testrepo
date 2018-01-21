@@ -68,9 +68,16 @@ int main(void)
 *0xFFE0 Yellow
 *0xFFFF White
 */
-Delay(2000);
-drawChar(20, 20, 'C', 0x07E0, 0xF800, 0);  //void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) 
-drawString(20, 40, "Hello world!", 0x07E0, 0xF800, 0); 
+char frase[] = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
+Delay(500);
+//drawChar(0, 0, 'A', 0x07E0, 0xF800, 0);
+//drawChar(20, 20, 'C', 0x07E0, 0xF800, 0);
+//drawChar(40, 40, 'C', 0x07E0, 0x0000, 0);
+//drawString(20, 60, "Hello world!", 0x07E0, 0xF800, 0);
+//drawString(20, 80, "Hello world!", 0x07E0, 0x0000, 0);
+//drawString(20, 100, frase, 0xFFFF, 0x0000, 0);
+
+drawString(0, 20, frase, 1500, 0x07E0, 0x0000, 0);
 
 //------------------------------
 	}

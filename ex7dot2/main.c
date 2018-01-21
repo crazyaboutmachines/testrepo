@@ -47,6 +47,7 @@ int main(void)
 	//init LCD
 	ST7735_init();
 	ST7735_backLight(1);
+	fillScreen(0x0000);
 
 	while(1){
 		static int ledval=0;
@@ -67,11 +68,9 @@ int main(void)
 *0xFFE0 Yellow
 *0xFFFF White
 */
+Delay(2000);
+drawChar(20, 20, 'C', 0x07E0, 0xF800, 0);  //void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) 
 
-fillScreen(0x0000);
-Delay(2000);
-drawChar(20, 20, 'a', 0x07E0, 0x0000, 0);  //void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) 
-Delay(2000);
 
 //------------------------------
 	}

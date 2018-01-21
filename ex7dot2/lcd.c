@@ -162,26 +162,28 @@ void fillScreen(uint16_t color)
 	}
 }
 
+
+//void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) 
 void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) 
 {
-int i, j;
-char aux;
-//for now size not implemented
-//clipping routine
+	int i, j;
+	int8_t aux;
+	//for now size not implemented
+	//clipping routine
 
 
-//draw routine
-ST7735_setAddrWindow(x, y, x+4, y+7, MADCTLGRAPHICS);
-	for (i=0; i < x+4; i++) {
-	aux=font[c*5+i];
-		for (j=0; j < y+7; j++) {
-		//---------------------------------------	
+	//draw routine
+	ST7735_setAddrWindow(x, y, x+4 , y+7, MADCTLGRAPHICS);  //MADCTLBMP
+	for (j=0; j < 8; j++) {
+		for (i=0; i < 5; i++) {
+			aux=(int8_t)font[c*5+i];
+			if(((aux>>j) & 0x01)==0x01)
+			{
 
-
-		if((aux>>j) & 0b00000001)ST7735_pushColor(&color ,1);
-
-
-		//---------------------------------------
+				ST7735_pushColor(&color ,1);
+			}else{
+				ST7735_pushColor(&bg ,1);
+			}
 		}
 	}
 }

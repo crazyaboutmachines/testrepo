@@ -162,18 +162,13 @@ void fillScreen(uint16_t color)
 	}
 }
 
-
-//void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) 
 void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) 
 {
 	int i, j;
 	int8_t aux;
-	//for now size not implemented
-	//clipping routine
-
-
-	//draw routine
-	ST7735_setAddrWindow(x, y, x+4 , y+7, MADCTLGRAPHICS);  //MADCTLBMP
+	//for now size and clipping not implemented
+	//draw
+	ST7735_setAddrWindow(x, y, x+4 , y+7, MADCTLGRAPHICS);
 	for (j=0; j < 8; j++) {
 		for (i=0; i < 5; i++) {
 			aux=(int8_t)font[c*5+i];
@@ -187,3 +182,21 @@ void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg
 		}
 	}
 }
+/*
+*	v==&v[0]
+*	*v==v[0]
+*	*(v+n)==v[n]
+*/
+void drawString(int16_t x, int16_t y, unsigned char *c, uint16_t color, uint16_t bg, uint8_t size) 
+{
+	int i;
+	for (i=0; i < 12; i++) {
+		drawChar(20+i*6, 20, c[i], 0x07E0, 0xF800, 0);
+	}
+}
+
+
+
+
+
+

@@ -70,7 +70,7 @@ int main(void)
 */
 Delay(2000);
 drawChar(20, 20, 'C', 0x07E0, 0xF800, 0);  //void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) 
-
+drawString(20, 40, "Hello world!", 0x07E0, 0xF800, 0); 
 
 //------------------------------
 	}
